@@ -3,20 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-
-struct ListNode{
-  struct ListNode* next;
-  char* key;
-  char* value;
-};
-
-
-struct Cache{
-  struct ListNode* head;
-  struct ListNode* lastNode;
-  int size;
-};
+#include "cache.h"
 
 void printCache(struct Cache* c){
   struct ListNode* head = c->head;
@@ -27,6 +14,14 @@ void printCache(struct Cache* c){
   }
 }
 
+void insertNode(struct Cache* c, struct ListNode* n){
+  struct ListNode* temp;
+  temp = n;
+  temp->next = c->head;
+  c->head = temp;
+}
+
+/*
 void addNode(struct Cache* c, struct ListNode* n){
 
   if (c->lastNode == NULL){
@@ -38,7 +33,7 @@ void addNode(struct Cache* c, struct ListNode* n){
     c->lastNode = n;
   }
 }
-
+*/
 
 struct ListNode* findNode(struct Cache* c, char* key){
   struct ListNode* head = c->head;
@@ -75,7 +70,7 @@ void setKey(struct Cache* c, char* key, char* value){
   n->key = key;
   n->value = value;
   n->next = NULL;
-  addNode(c, n);
+  insertNode(c, n);
 }
 
 
@@ -86,7 +81,7 @@ char* getValue(struct Cache* c, char* key){
   }
 }
 
-
+/*
 int main(){
   struct Cache *c = malloc(sizeof(struct Cache));
   struct ListNode *n = malloc(sizeof(struct ListNode));
@@ -106,8 +101,9 @@ int main(){
   value = getValue(c, key);
   printf("%s: %s\n", key, value);
   printCache(c);
-  deleteKey(c, "Bar");
-  printCache(c);
+  //deleteKey(c, "Bar");
+  //printCache(c);
   return 0;
   
 }
+*/
