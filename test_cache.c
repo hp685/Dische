@@ -4,8 +4,8 @@
 
 
 void test_cache_insert(){
-  struct Cache* c = malloc(sizeof(struct Cache));
-  struct ListNode* n = malloc(sizeof(struct ListNode));
+  Cache* c = malloc(sizeof(Cache));
+  ListNode* n = malloc(sizeof(ListNode));
   char* key;
   char* vtable[10], *ktable[10];
 
@@ -29,8 +29,8 @@ void test_cache_insert(){
 
 
 void test_cache_delete(){
-  struct Cache* c = malloc(sizeof(struct Cache));
-  struct ListNode* n = malloc(sizeof(struct ListNode));
+  Cache* c = malloc(sizeof(Cache));
+  ListNode* n = malloc(sizeof(ListNode));
   setKey(c, "A", "FOO");
   setKey(c, "B", "BAR");
   setKey(c, "C", "ME");
@@ -44,12 +44,54 @@ void test_cache_delete(){
 }
 
 
+void test_cache_overwrite_value(){
+  Cache* c = malloc(sizeof(Cache));
+  ListNode* n = malloc(sizeof(ListNode));
+  setKey(c, "A", "DAFT");
+  TEST_ASSERT_EQUAL(getValue(c, "A"), "DAFT");
+  setKey(c, "B", "SKUNK");
+  TEST_ASSERT_EQUAL(getValue(c, "B"), "SKUNK");
+  setKey(c, "A", "PUNK");
+  TEST_ASSERT_EQUAL(getValue(c, "A"), "PUNK");
+  printCache(c);
+}
 
+void test_find_node(){
+  Cache* c = malloc(sizeof(Cache));
+  ListNode* n = malloc(sizeof(ListNode));
+  setKey(c, "A", "FIZZLE");
+  TEST_ASSERT_EQUAL(getValue(c, "A"), "FIZZLE");
+  setKey(c, "B", "DRIZZLE");
+  TEST_ASSERT_EQUAL(getValue(c, "B"), "DRIZZLE");
+  setKey(c, "C", "SIZZLE");
+  TEST_ASSERT_EQUAL(getValue(c, "C"), "SIZZLE");
+  TEST_ASSERT_TRUE(getValue(c, "Z") == NULL);
+
+}
+
+
+void test_find_prev(){
+  Cache* c = malloc(sizeof(Cache));
+  ListNode* n = malloc(sizeof(ListNode));
+  setKey(c, "A", "FIZZLE");
+  TEST_ASSERT_EQUAL(getValue(c, "A"), "FIZZLE");
+  setKey(c, "B", "DRIZZLE");
+  TEST_ASSERT_EQUAL(getValue(c, "B"), "DRIZZLE");
+  setKey(c, "C", "SIZZLE");
+  ListNode* prev = findPrev(c, "B");
+  TEST_ASSERT_EQUAL(prev->key, "C");
+  TEST_ASSERT_EQUAL(prev->value, "SIZZLE");
+  prev = findPrev(c, prev->key);
+  TEST_ASSERT_EQUAL(prev, NULL);
+}
 
 int main(){
   UNITY_BEGIN();
   RUN_TEST(test_cache_insert);
   RUN_TEST(test_cache_delete);
+  RUN_TEST(test_cache_overwrite_value);
+  RUN_TEST(test_find_node);
+  RUN_TEST(test_find_prev);
   UNITY_END();
   return 0;
 }

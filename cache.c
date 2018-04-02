@@ -3,31 +3,34 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include "cache.h"
 
-void printNode(struct ListNode* n){
+void printNode(ListNode* n){
   printf(" %s = %s", n->key, n->value);
 }
 
-void printCache(struct Cache* c){
-  struct ListNode* head = c->head;
+void printCache(Cache* c){
+  ListNode* head = c->head;
   printf("--------------------------------\n");
   while(head){
-    printf("%s: %s\n", head->key, head->value);
+    printf("(%s, %s)-->", head->key, head->value);
     head = head->next;
   }
+  assert(head == NULL);
+  printf("%s\n", "NULL");
   printf("================================\n");
 }
 
-void insertNode(struct Cache* c, struct ListNode* n){
-  struct ListNode* temp;
+void insertNode(Cache* c, ListNode* n){
+  ListNode* temp;
   temp = n;
   temp->next = c->head;
   c->head = temp;
 }
 
-struct ListNode* findPrev(struct Cache* c, char* key){
-  struct ListNode* head = c->head;
+ListNode* findPrev(Cache* c, char* key){
+  ListNode* head = c->head;
 
   while (head){
     if (head->next == NULL){
@@ -41,20 +44,21 @@ struct ListNode* findPrev(struct Cache* c, char* key){
 
 }
 
-struct ListNode* findNode(struct Cache* c, char* key){
-  struct ListNode* head = c->head;
+ListNode* findNode(Cache* c, char* key){
+  ListNode* head = c->head;
   while(head){
     if(strcmp(head->key, key) == 0){
       return head;
     }
     head = head->next;
   }
+  return NULL;
 }
 
 
-void deleteKey(struct Cache *c, char* key){
-  struct ListNode* prev = findPrev(c, key);
-  struct ListNode* toRemove;
+void deleteKey(Cache *c, char* key){
+  ListNode* prev = findPrev(c, key);
+  ListNode* toRemove;
   toRemove = findNode(c, key);
 
   if (toRemove == NULL){  /* Key doesn't exist */
@@ -71,13 +75,13 @@ void deleteKey(struct Cache *c, char* key){
 }
 
 
-void setKey(struct Cache* c, char* key, char* value){
-  struct ListNode* tempNode = findNode(c, key);
+void setKey(Cache* c, char* key, char* value){
+  ListNode* tempNode = findNode(c, key);
   if(tempNode != NULL){
     tempNode->value = value;
     return;
   }
-  struct ListNode *n = malloc(sizeof(struct ListNode));
+  ListNode *n = malloc(sizeof(ListNode));
   n->key = key;
   n->value = value;
   n->next = NULL;
@@ -85,8 +89,8 @@ void setKey(struct Cache* c, char* key, char* value){
 }
 
 
-char* getValue(struct Cache* c, char* key){
-  struct ListNode* n = findNode(c, key);
+char* getValue(Cache* c, char* key){
+  ListNode* n = findNode(c, key);
   if(n){
     return n->value;
   }
