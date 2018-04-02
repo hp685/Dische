@@ -91,30 +91,3 @@ char* getValue(struct Cache* c, char* key){
     return n->value;
   }
 }
-
-/*
-int main(){
-  struct Cache *c = malloc(sizeof(struct Cache));
-  struct ListNode *n = malloc(sizeof(struct ListNode));
-  char* key = "Foo";
-  setKey(c, key, "1123");
-  char* value = getValue(c, key);
-  printf("%s: %s\n", key, value);
-  key = "Bar";
-  setKey(c, key, "231");
-  value = getValue(c, key);
-  printf("%s: %s \n", key, value);
-  key = "Non-existent";
-  value = getValue(c, key);
-  printf("%s: %s\n", key, value);
-  key = "Foo";
-  setKey(c, key, "1");
-  value = getValue(c, key);
-  printf("%s: %s\n", key, value);
-  printCache(c);
-  //deleteKey(c, "Bar");
-  //printCache(c);
-  return 0;
-
-}
-*/
