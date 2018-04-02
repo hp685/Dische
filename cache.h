@@ -22,3 +22,4 @@ char* getValue(Cache*, char* );
 void deleteKey(Cache*, char* );
 void printNode(ListNode*);
 ListNode* findPrev(Cache* c, char* key);
+int countNodes(Cache* c);

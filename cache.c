@@ -6,27 +6,11 @@
 #include <assert.h>
 #include "cache.h"
 
-void printNode(ListNode* n){
-  printf(" %s = %s", n->key, n->value);
-}
 
-void printCache(Cache* c){
-  ListNode* head = c->head;
-  printf("--------------------------------\n");
-  while(head){
-    printf("(%s, %s)-->", head->key, head->value);
-    head = head->next;
-  }
-  assert(head == NULL);
-  printf("%s\n", "NULL");
-  printf("================================\n");
-}
 
 void insertNode(Cache* c, ListNode* n){
-  ListNode* temp;
-  temp = n;
-  temp->next = c->head;
-  c->head = temp;
+  n->next = c->head;
+  c->head = n;
 }
 
 ListNode* findPrev(Cache* c, char* key){
@@ -94,4 +78,31 @@ char* getValue(Cache* c, char* key){
   if(n){
     return n->value;
   }
+}
+
+
+void printNode(ListNode* n){
+  printf(" %s = %s", n->key, n->value);
+}
+
+void printCache(Cache* c){
+  ListNode* head = c->head;
+  printf("--------------------------------\n");
+  while(head){
+    printf("(%s, %s)-->", head->key, head->value);
+    head = head->next;
+  }
+  assert(head == NULL);
+  printf("%s\n", "NULL");
+  printf("================================\n");
+}
+
+int countNodes(Cache* c){
+  ListNode* head = c->head;
+  int count = 0;
+  while(head){
+    head = head->next;
+    count++;
+  }
+  return count;
 }

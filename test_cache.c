@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "cache.h"
 #include "unity.h"
 
@@ -5,7 +7,6 @@
 
 void test_cache_insert(){
   Cache* c = malloc(sizeof(Cache));
-  ListNode* n = malloc(sizeof(ListNode));
   char* key;
   char* vtable[10], *ktable[10];
 
@@ -30,7 +31,6 @@ void test_cache_insert(){
 
 void test_cache_delete(){
   Cache* c = malloc(sizeof(Cache));
-  ListNode* n = malloc(sizeof(ListNode));
   setKey(c, "A", "FOO");
   setKey(c, "B", "BAR");
   setKey(c, "C", "ME");
@@ -46,7 +46,6 @@ void test_cache_delete(){
 
 void test_cache_overwrite_value(){
   Cache* c = malloc(sizeof(Cache));
-  ListNode* n = malloc(sizeof(ListNode));
   setKey(c, "A", "DAFT");
   TEST_ASSERT_EQUAL(getValue(c, "A"), "DAFT");
   setKey(c, "B", "SKUNK");
@@ -58,7 +57,6 @@ void test_cache_overwrite_value(){
 
 void test_find_node(){
   Cache* c = malloc(sizeof(Cache));
-  ListNode* n = malloc(sizeof(ListNode));
   setKey(c, "A", "FIZZLE");
   TEST_ASSERT_EQUAL(getValue(c, "A"), "FIZZLE");
   setKey(c, "B", "DRIZZLE");
@@ -72,7 +70,6 @@ void test_find_node(){
 
 void test_find_prev(){
   Cache* c = malloc(sizeof(Cache));
-  ListNode* n = malloc(sizeof(ListNode));
   setKey(c, "A", "FIZZLE");
   TEST_ASSERT_EQUAL(getValue(c, "A"), "FIZZLE");
   setKey(c, "B", "DRIZZLE");
@@ -83,7 +80,34 @@ void test_find_prev(){
   TEST_ASSERT_EQUAL(prev->value, "SIZZLE");
   prev = findPrev(c, prev->key);
   TEST_ASSERT_EQUAL(prev, NULL);
+
 }
+
+void test_insert_million_items(){
+  Cache* c = malloc(sizeof(Cache));
+  char key[1000000], value[1000000];
+  setKey(c, "1", "1");
+  printf("%p\n", (void*) c);
+  setKey(c, "2", "2");
+  printf("%p\n", (void*) c);
+  setKey(c, "3", "3");
+  printf("%p\n", (void*) c);
+  setKey(c, "4", "4");
+  printf("%p\n", (void*) c);
+  setKey(c, "5", "5");
+  for (int i = 6; i < 20; i++){
+    sprintf(key, "%d", i);
+    sprintf(value, "%d", i);
+    puts(key);
+    puts(value);
+    printf("%p\n", (void*)c);
+    setKey(c, key, value);
+    printCache(c);
+  }
+  printCache(c);
+  TEST_ASSERT_EQUAL(countNodes(c), 100000);
+}
+
 
 int main(){
   UNITY_BEGIN();
@@ -92,6 +116,7 @@ int main(){
   RUN_TEST(test_cache_overwrite_value);
   RUN_TEST(test_find_node);
   RUN_TEST(test_find_prev);
+  RUN_TEST(test_insert_million_items);
   UNITY_END();
   return 0;
 }
