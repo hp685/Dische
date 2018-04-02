@@ -14,8 +14,10 @@ struct Cache{
   int size;
 };
 
-void printCache(struct Cache* c);
-void insertNode(struct Cache* c, struct ListNode* n);
-struct ListNode* findNode(struct Cache* c, char* key);
-void setKey(struct Cache* c, char* key, char* value);
-char* getValue(struct Cache* c, char* key);
+void printCache(struct Cache*);
+void insertNode(struct Cache* , struct ListNode* );
+struct ListNode* findNode(struct Cache* , char* );
+void setKey(struct Cache* , char* , char* );
+char* getValue(struct Cache*, char* );
+void deleteKey(struct Cache*, char* );
+void printNode(struct ListNode*);

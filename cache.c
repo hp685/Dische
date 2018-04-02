@@ -5,13 +5,18 @@
 #include <string.h>
 #include "cache.h"
 
+void printNode(struct ListNode* n){
+  printf(" %s = %s", n->key, n->value);
+}
+
 void printCache(struct Cache* c){
   struct ListNode* head = c->head;
-   
+  printf("--------------------------------\n");
   while(head){
     printf("%s: %s\n", head->key, head->value);
     head = head->next;
   }
+  printf("================================\n");
 }
 
 void insertNode(struct Cache* c, struct ListNode* n){
@@ -21,19 +26,20 @@ void insertNode(struct Cache* c, struct ListNode* n){
   c->head = temp;
 }
 
-/*
-void addNode(struct Cache* c, struct ListNode* n){
+struct ListNode* findPrev(struct Cache* c, char* key){
+  struct ListNode* head = c->head;
 
-  if (c->lastNode == NULL){
-    c->head = n;
-    c->lastNode = n;
+  while (head){
+    if (head->next == NULL){
+      return NULL;
+    }
+    if (strcmp(head->next->key, key) == 0){
+        return head;
+    }
+    head = head->next;
   }
-  else{
-    c->lastNode->next = n;
-    c->lastNode = n;
-  }
+
 }
-*/
 
 struct ListNode* findNode(struct Cache* c, char* key){
   struct ListNode* head = c->head;
@@ -46,18 +52,23 @@ struct ListNode* findNode(struct Cache* c, char* key){
 }
 
 
-
-
 void deleteKey(struct Cache *c, char* key){
-  struct ListNode* old = findNode(c, key);
+  struct ListNode* prev = findPrev(c, key);
   struct ListNode* toRemove;
-  toRemove = old;
-  toRemove = toRemove->next;
-  printf("Old: %s\n", old->key);
-  //printf("To Remove %s\n", toRemove->key);
-  free(old);
-}
+  toRemove = findNode(c, key);
 
+  if (toRemove == NULL){  /* Key doesn't exist */
+    return;
+  }
+  else if(prev == NULL){
+    c->head = c->head->next;
+  }
+  else{
+    prev->next = prev->next->next;
+  }
+  free(toRemove);
+
+}
 
 
 void setKey(struct Cache* c, char* key, char* value){
@@ -87,7 +98,7 @@ int main(){
   struct ListNode *n = malloc(sizeof(struct ListNode));
   char* key = "Foo";
   setKey(c, key, "1123");
-  char* value = getValue(c, key); 
+  char* value = getValue(c, key);
   printf("%s: %s\n", key, value);
   key = "Bar";
   setKey(c, key, "231");
@@ -104,6 +115,6 @@ int main(){
   //deleteKey(c, "Bar");
   //printCache(c);
   return 0;
-  
+
 }
 */
