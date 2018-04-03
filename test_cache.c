@@ -83,30 +83,20 @@ void test_find_prev(){
 
 }
 
-void test_insert_million_items(){
+void test_insert_10k_items(){
   Cache* c = malloc(sizeof(Cache));
-  char key[1000000], value[1000000];
-  setKey(c, "1", "1");
-  printf("%p\n", (void*) c);
-  setKey(c, "2", "2");
-  printf("%p\n", (void*) c);
-  setKey(c, "3", "3");
-  printf("%p\n", (void*) c);
-  setKey(c, "4", "4");
-  printf("%p\n", (void*) c);
-  setKey(c, "5", "5");
-  for (int i = 6; i < 20; i++){
+  char *key , *value;
+  for(int i = 0; i < 10000; i++){
+    key = malloc(sizeof(char*));
+    value = malloc(sizeof(char *));
     sprintf(key, "%d", i);
     sprintf(value, "%d", i);
-    puts(key);
-    puts(value);
-    printf("%p\n", (void*)c);
     setKey(c, key, value);
-    printCache(c);
+    TEST_ASSERT_EQUAL(getValue(c,key), value);
   }
-  printCache(c);
-  TEST_ASSERT_EQUAL(countNodes(c), 100000);
+  TEST_ASSERT_EQUAL(countNodes(c), 10000);
 }
+
 
 
 int main(){
@@ -116,7 +106,7 @@ int main(){
   RUN_TEST(test_cache_overwrite_value);
   RUN_TEST(test_find_node);
   RUN_TEST(test_find_prev);
-  RUN_TEST(test_insert_million_items);
+  RUN_TEST(test_insert_10k_items);
   UNITY_END();
   return 0;
 }
