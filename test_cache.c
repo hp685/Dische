@@ -98,6 +98,26 @@ void test_insert_10k_items(){
 }
 
 
+void insert_large_key_values(){
+  Cache* c = malloc(sizeof(Cache));
+  char* key = "funkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunk\
+  funkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunk\
+  funkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunk\
+  funkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunk\
+  funkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunkfunk\
+  funkfunkfunkfunk";
+
+  char* value = "dunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunk\
+  dunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunk\
+  dunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunk\
+  dunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunk\
+  dunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunkdunk\
+  dunkdunkdunkdunk";
+  setKey(c, key, value);
+  TEST_ASSERT_EQUAL(getValue(c, key), value);
+  printCache(c);
+}
+
 
 int main(){
   UNITY_BEGIN();
@@ -107,6 +127,7 @@ int main(){
   RUN_TEST(test_find_node);
   RUN_TEST(test_find_prev);
   RUN_TEST(test_insert_10k_items);
+  RUN_TEST(insert_large_key_values);
   UNITY_END();
   return 0;
 }
