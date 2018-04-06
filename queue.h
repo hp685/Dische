@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include <pthread.h>
+#include <stdbool.h>
 #include "cache.h"
 
-struct Task{
+typedef struct Task{
     char* item;
-    Task* next;
-};
+    struct Task* next;
+}Task;
 
 typedef struct Queue{
   Task* head;
@@ -15,5 +16,7 @@ typedef struct Queue{
 }Queue;
 
 void put(Queue*, Task*);
-Task* get(Queue*, Task*);
-void is_empty(Queue*);
+Task* get(Queue*);
+bool is_empty(Queue*);
+void print_queue(Queue*);
+Queue* new_queue();
