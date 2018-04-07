@@ -67,3 +67,12 @@ Queue* new_queue(){
   q->size = 0;
   return q;
 }
+
+
+Task* new_task(int fd){
+  Task* task = (Task*) malloc(sizeof(Task));
+  task->fd = fd;
+  task->item = NULL;
+  task->next = NULL;
+  return task;
+}

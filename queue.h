@@ -4,11 +4,12 @@
 #include "cache.h"
 
 
-typedef struct{
+typedef struct Task{
   void* function;
   void* argument;
   struct Task* next;
   char* item;
+  int fd ; /*File descriptor of the client*/
 }Task;
 
 typedef struct Queue{
@@ -25,3 +26,4 @@ Task* get(Queue*);
 bool is_empty(Queue*);
 void print_queue(Queue*);
 Queue* new_queue();
+Task* new_task(int);
