@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <stdbool.h>
+#include <semaphore.h>
 
 #define PROCESSING "PROCESSING"
 #define NEW "NEW"
@@ -17,6 +18,7 @@ typedef struct Task{
     int fd ; /*File descriptor of the client*/
     void* result;
     char* state;
+    sem_t result_ready;
 
 }Task;
 
@@ -28,6 +30,7 @@ typedef struct{
     size_t size;
     pthread_mutex_t lock;
     pthread_cond_t signal_work;
+    sem_t there_is_work_sem;
 }Queue;
 
 

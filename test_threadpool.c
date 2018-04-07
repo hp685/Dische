@@ -7,7 +7,7 @@
 #include "tests.h"
 
 #define DUMMY_FD 0
-#define BLOCK_UNTIL_DONE(work) while(strcmp(work->state, COMPLETED)!=0){sleep(1); puts("SLEEPING 1"); puts(work->state);}
+#define BLOCK_UNTIL_DONE(work) {sem_wait(&work->result_ready);}
 #undef NUM_THREADS
 #define NUM_THREADS 10
 
@@ -34,7 +34,6 @@ char *reverse(char *str){
 
 
 void test_work_square_int(){
-
     ThreadPool* pool = create_new_pool();
     Task* work = new_task(DUMMY_FD);
 

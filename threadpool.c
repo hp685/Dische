@@ -13,16 +13,11 @@ void check_queue(ThreadPool* pool){
   */
     for(;;){
 
-        // if (pthread_cond_wait(&pool->work_q->signal_work, &pool->work_q->lock) != 0){
-        //
-        //     perror("Condition 'signal_work' wait failure!");
-        //     exit(EXIT_FAILURE);
-        // }
-
+        sem_wait(&pool->work_q->there_is_work_sem);
         Task* work = get(pool->work_q);
 
         if (work == NULL){
-            sleep(POLL_INTERVAL);
+            //sleep(POLL_INTERVAL);
             continue;
         }
 
@@ -39,6 +34,7 @@ void check_queue(ThreadPool* pool){
         */
         work->result = (*fun_ptr)(work->argument);
         work->state = COMPLETED;
+        sem_post(&work->result_ready);
 
 
     }
@@ -59,6 +55,7 @@ ThreadPool* create_new_pool(){
         exit(EXIT_FAILURE);
     }
 
+    sem_init(&pool->work_q->there_is_work_sem, 0, 0);
 
     if (pthread_cond_init(&pool->work_q->signal_work, NULL) != 0){
 

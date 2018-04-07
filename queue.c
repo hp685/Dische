@@ -7,7 +7,6 @@ void put(Queue* q, Task* t){
 
     pthread_mutex_lock(&q->lock);
 
-
     if (is_empty(q) == true){
 
         q->head = t;
@@ -26,11 +25,7 @@ void put(Queue* q, Task* t){
     /* Signal threads there is work to do */
 
     pthread_mutex_unlock(&q->lock);
-    // puts("Broadcasting there is work to do");
-    // if (pthread_cond_broadcast(&q->signal_work) != 0){
-    //     perror("Error broadcasting to threads waiting on signal work");
-    // };
-
+    sem_post(&q->there_is_work_sem);
 }
 
 
@@ -55,18 +50,14 @@ Task* get(Queue* q){
     }
 
     pthread_mutex_unlock(&q->lock);
-
     return top;
 }
 
 
 bool is_empty(Queue* q){
 
-    if (q->size){
-
+    if (q->size)
         return false;
-    }
-
     return true;
 }
 
@@ -90,7 +81,6 @@ Queue* new_queue(){
     q->head = NULL;
     q->tail = NULL;
     q->size = 0;
-
     return q;
 
 }
@@ -106,6 +96,6 @@ Task* new_task(int fd){
     task->function = NULL;
     task->argument = NULL;
     task->state = "NEW";
-
+    sem_init(&task->result_ready, 0, 0);
     return task;
 }

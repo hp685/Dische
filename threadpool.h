@@ -6,7 +6,7 @@
 
 typedef struct {
 
- 	pthread_mutex_t lock;
+ 	  pthread_mutex_t lock;
     pthread_t threads[NUM_THREADS];
     Queue* work_q;
 
