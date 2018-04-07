@@ -3,9 +3,12 @@
 #include <stdbool.h>
 #include "cache.h"
 
-typedef struct Task{
-    char* item;
-    struct Task* next;
+
+typedef struct{
+  void* function;
+  void* argument;
+  struct Task* next;
+  char* item;
 }Task;
 
 typedef struct Queue{
@@ -14,6 +17,8 @@ typedef struct Queue{
   size_t size;
   pthread_mutex_t lock;
 }Queue;
+
+
 
 void put(Queue*, Task*);
 Task* get(Queue*);
