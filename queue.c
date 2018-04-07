@@ -25,7 +25,7 @@ void put(Queue* q, Task* t){
     /* Signal threads there is work to do */
 
     pthread_mutex_unlock(&q->lock);
-    sem_post(&q->there_is_work_sem);
+    sem_post(&q->unblock_sem);
 }
 
 
