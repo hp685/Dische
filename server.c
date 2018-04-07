@@ -6,6 +6,9 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include "cache.h"
+#include "queue.h"
+#include "threadpool.h"
 
 #define NUM_THREADS 10
 #define MAX_BYTES 65536
@@ -16,7 +19,7 @@
 
 
 const int LISTEN_BACKLOG = 512;
-const Cache* cache =  malloc(sizeof(Cache));
+const Cache* cache = (Cache*) malloc(sizeof(Cache));
 
 void do_work(Task* work){
 /**/
@@ -28,35 +31,36 @@ void do_work(Task* work){
 
 char* dispatch(char* item){
 
-  char* token = strtok(item, ' ');
-  char* action = malloc(sizeof(token));
+  const char* delim = " ";
+  char* token = strtok(item, delim);
+  char* action = (char* ) malloc(sizeof(token));
   strcpy(action, token);
   free(token);
 
   if (strcmp(action, GET) == 0){
 
-    token = strtok(NULL, ' ');
-    char* key = malloc(sizeof(token));
+    token = strtok(NULL, delim);
+    char* key = (char* ) malloc(sizeof(token));
     strcpy(key, token);
     free(token);
     return getKey(cache, key);
 
   }else if(strcmp(action, SET) == 0){
 
-    token = strtok(NULL, ' ');
-    char* key = malloc(sizeof(token));
+    token = strtok(NULL, delim);
+    char* key =  (char* ) malloc(sizeof(token));
     strcpy(key, token);
     free(token);
-    token = strtok(NULL, ' ');
-    char* value = malloc(sizeof(token));
+    token = strtok(NULL, delim);
+    char* value = (char* ) malloc(sizeof(token));
     strcpy(value, token);
     free(token);
     return setKey(cache, key, value);
 
   }else if(strcmp(action, DELETE) == 0){
 
-    token = strtok(NULL, ' ');
-    char* key = malloc(sizeof(token));
+    token = strtok(NULL, delim);
+    char* key = (char*) malloc(sizeof(token));
     strcpy(key, token);
     free(token);
     return deleteKey(cache, key);
