@@ -35,14 +35,12 @@ char* dispatch(char* item){
   char* token = strtok(item, delim);
   char* action = (char* ) malloc(sizeof(token));
   strcpy(action, token);
-  free(token);
 
   if (strcmp(action, GET) == 0){
 
     token = strtok(NULL, delim);
     char* key = (char* ) malloc(sizeof(token));
     strcpy(key, token);
-    free(token);
     return getKey(cache, key);
 
   }else if(strcmp(action, SET) == 0){
@@ -50,11 +48,9 @@ char* dispatch(char* item){
     token = strtok(NULL, delim);
     char* key =  (char* ) malloc(sizeof(token));
     strcpy(key, token);
-    free(token);
     token = strtok(NULL, delim);
     char* value = (char* ) malloc(sizeof(token));
     strcpy(value, token);
-    free(token);
     return setKey(cache, key, value);
 
   }else if(strcmp(action, DELETE) == 0){
@@ -62,7 +58,6 @@ char* dispatch(char* item){
     token = strtok(NULL, delim);
     char* key = (char*) malloc(sizeof(token));
     strcpy(key, token);
-    free(token);
     return deleteKey(cache, key);
 
   }else{
