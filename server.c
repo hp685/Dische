@@ -10,7 +10,6 @@
 #include "queue.h"
 #include "threadpool.h"
 
-#define NUM_THREADS 10
 #define MAX_BYTES 65536
 
 #define GET "GET"
@@ -23,6 +22,7 @@ const Cache* cache = (Cache*) malloc(sizeof(Cache));
 
 void do_work(Task* work){
 /**/
+
 
 }
 
@@ -115,8 +115,10 @@ void listen_forever(){
                 int client_fd = accept(sock, (struct sockaddr *) &client_address, sizeof(client_address));
 		            Task* request = create_new_task(client_fd);
                 request->item = read(client_fd, buffer, MAX_BYTES);
+                request->function = do_work;
                 /*TODO: Make this an inqueue with its own lock to prevent server from blocking to obtain work_q lock*/
                 pthread_mutex_lock(&pool_lock);
+
                 put(pool->work_q, request);
                 pthread_mutex_unlock(&pool_lock);
             }

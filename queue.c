@@ -74,5 +74,14 @@ Task* new_task(int fd){
   task->fd = fd;
   task->item = NULL;
   task->next = NULL;
+  task->result = NULL;
+  task->function = NULL;
+  task->argument = NULL;
+  task->state = "NEW";
   return task;
+}
+
+void print_task(Task* t){
+
+    //printf("%s\n", t->result);
 }

@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <stdbool.h>
-#include "cache.h"
+
+#define PROCESSING "PROCESSING"
+#define NEW "NEW"
+#define COMPLETED "COMPLETED"
 
 
 typedef struct Task{
@@ -10,9 +13,11 @@ typedef struct Task{
   struct Task* next;
   char* item;
   int fd ; /*File descriptor of the client*/
+  void* result;
+  char* state;
 }Task;
 
-typedef struct Queue{
+typedef struct{
   Task* head;
   Task* tail;
   size_t size;
@@ -27,3 +32,4 @@ bool is_empty(Queue*);
 void print_queue(Queue*);
 Queue* new_queue();
 Task* new_task(int);
+void print_task();
