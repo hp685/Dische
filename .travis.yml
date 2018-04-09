@@ -1,4 +1,4 @@
 language: C
 os: linux
 compiler: gcc
-script : make clean && make test
+script : make test && make clean
