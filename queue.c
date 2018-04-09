@@ -23,7 +23,13 @@ void put(Queue* q, Task* t){
     }
 
     q->size++;
+    /* Signal threads there is work to do */
+
     pthread_mutex_unlock(&q->lock);
+    // puts("Broadcasting there is work to do");
+    // if (pthread_cond_broadcast(&q->signal_work) != 0){
+    //     perror("Error broadcasting to threads waiting on signal work");
+    // };
 
 }
 

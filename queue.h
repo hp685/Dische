@@ -7,6 +7,7 @@
 #define COMPLETED "COMPLETED"
 
 
+
 typedef struct Task{
 
     void* function;
@@ -26,7 +27,7 @@ typedef struct{
     Task* tail;
     size_t size;
     pthread_mutex_t lock;
-
+    pthread_cond_t signal_work;
 }Queue;
 
 
