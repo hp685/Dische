@@ -2,7 +2,7 @@
 
 CC=gcc
 
-CFLAGS= -I ./unity/src/
+CFLAGS= -I ./unity/src/ -std=c99
 
 TFLAGS= ./unity/src/unity.c -pthread
 
