@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "cache.h"
-#include "unity.h"
+#include "tests.h"
 
 
 
 void test_cache_insert(){
-  
+
     Cache* c = malloc(sizeof(Cache));
     char* key;
     char* vtable[10], *ktable[10];
@@ -31,7 +31,7 @@ void test_cache_insert(){
 
 
 void test_cache_delete(){
-  
+
     Cache* c = malloc(sizeof(Cache));
     setKey(c, "A", "FOO");
     setKey(c, "B", "BAR");
@@ -48,7 +48,7 @@ void test_cache_delete(){
 
 
 void test_cache_overwrite_value(){
-  
+
     Cache* c = malloc(sizeof(Cache));
     setKey(c, "A", "DAFT");
     TEST_ASSERT_EQUAL(getValue(c, "A"), "DAFT");
@@ -75,7 +75,7 @@ void test_find_node(){
 
 
 void test_find_prev(){
-  
+
     Cache* c = malloc(sizeof(Cache));
     setKey(c, "A", "FIZZLE");
     TEST_ASSERT_EQUAL(getValue(c, "A"), "FIZZLE");
@@ -132,9 +132,10 @@ void insert_large_key_values(){
 
 
 int main(){
-    
+
+    puts("------------------------------------Cache Tests--------------------------------\n");
     UNITY_BEGIN();
-    
+
     RUN_TEST(test_cache_insert);
     RUN_TEST(test_cache_delete);
     RUN_TEST(test_cache_overwrite_value);
@@ -142,8 +143,8 @@ int main(){
     RUN_TEST(test_find_prev);
     RUN_TEST(test_insert_10k_items);
     RUN_TEST(insert_large_key_values);
-    
+
     UNITY_END();
-  
+
     return 0;
 }
