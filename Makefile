@@ -9,7 +9,7 @@ TESTDIR = ./tests/
 
 test: test_q test_cache test_pool
 
-test_tp: $(TESTDIR)test_threadpool.c
+test_pool: $(TESTDIR)test_threadpool.c
 	$(CC) $(CFLAGS) $(TFLAGS) $(SRCDIR)queue.c $(SRCDIR)threadpool.c $(TESTDIR)test_threadpool.c -o $(TESTDIR)test_tp.o
 	$(TESTDIR)/test_tp.o
 test_q: $(TESTDIR)test_queue.c
