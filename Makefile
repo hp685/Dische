@@ -7,7 +7,7 @@ TFLAGS= ./unity/src/unity.c -pthread
 SRCDIR = ./src/
 TESTDIR = ./tests/
 
-test: test_q test_cache test_pool
+test: test_q test_cache test_pool test_hash
 
 test_pool: $(TESTDIR)test_threadpool.c
 	$(CC) $(CFLAGS) $(TFLAGS) $(SRCDIR)queue.c $(SRCDIR)threadpool.c $(TESTDIR)test_threadpool.c -o $(TESTDIR)test_tp.o
