@@ -42,16 +42,40 @@ unsigned long get_index(void* key){
 void delete(void* key){
 
     unsigned long index;
+    Map* to_delete;
+    Map* node;
     index = get_index(key);
-    Map* node = __m[index];
+    node = __m[index];
 
-    for(; node->next != NULL && strcmp(node->next->key, key) !=0; node=node->next){
+    if (node == NULL){ /* Key doesn't exist*/
+      return;
     }
+    else if(node->next == NULL){
 
-    Map* to_delete = node->next;
-    node->next = node->next->next;
-    free(to_delete);
+      reinit_node(node);
+      return;
+    }
+    else{
 
+      while(node->next != NULL){
+
+        if (strcmp(node->next->key, key)){
+          to_delete = node->next;
+          node->next  = node->next->next;
+        }
+        else{
+          node = node->next;
+        }
+      }
+    }
+    if (to_delete  != NULL){
+
+      print_chain(__m[index], index);
+      free(to_delete->value);
+      free(to_delete->key);
+      free(to_delete);
+
+    }
 }
 
 char* get(void* key){
@@ -59,6 +83,7 @@ char* get(void* key){
     unsigned long index;
     index = get_index(key);
     Map* node = __m[index];
+
     if ( node->key == NULL ){
         return NULL;
     }
@@ -95,7 +120,7 @@ void set(void* key, void* value){
         num_nodes++;
     }
 
-    Map* node = malloc(sizeof(Map));
+    Map* node = malloc(sizeof(Map*));
 
     node->key = malloc( sizeof(char) * (strlen(key) + 1) );
     strcpy(node->key, key);
@@ -103,25 +128,53 @@ void set(void* key, void* value){
     node->value = malloc( sizeof(char) *  (strlen(value) + 1) );
     strcpy(node->value, value);
 
+    node->next = malloc(sizeof(Map*));
     node->next = NULL;
 
     if(num_nodes == 0){
         __m[index] = node;
+
     }else{
+
         _dn->next = node;
     }
-    if (num_nodes / MAX_BUCKETS == 1){
+    if (num_nodes / MAX_BUCKETS >= 1){
         /* Needs rehash*/
         rehash();
     }
 
+    print_chain(__m[index], index);
+    puts("Set\n");
     }
 
+
 void map_init(){
+
     for(int i = 0; i < MAX_BUCKETS; i++){
         __m[i] = malloc(sizeof(Map));
         __m[i]->key = NULL;
         __m[i]->value = NULL;
         __m[i]->next = NULL;
      }
+}
+
+void reinit_node(Map* node){
+
+  node->key = NULL;
+  node->value = NULL;
+  node->next = NULL;
+
+}
+
+void print_chain(Map* head, unsigned long index){
+
+  printf("Bucket: %d", index);
+
+  while(head){
+
+    printf("(%s, %s)->",head->key, head->value);
+    head = head->next;
+  }
+
+  putchar('\n');
 }

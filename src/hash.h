@@ -5,12 +5,13 @@
 
 typedef struct Map{
 
-    char* key;
-    char* value;
+    void* key;
+    void* value;
     struct Map* next;
     pthread_mutex_t index_lock;
 
 }Map;
+
 
 unsigned long hash(char*);
 
