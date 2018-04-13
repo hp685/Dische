@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -18,12 +19,9 @@ unsigned long hash(char* s){
     unsigned char* us;
     s += '\0';
     us = (unsigned char* ) s;
-    puts(s);
     h = 0;
-    while( *us != '\0' ){
-        puts(*us);
-        h = h * MULTIPLIER + *us;
-        us++;
+    for(int i = 0; i < strlen(us); i++){
+        h = h * MULTIPLIER + us[i];
     }
 
     return h;
@@ -35,8 +33,8 @@ unsigned long get_index(void* key){
     unsigned long hash_code = hash((char*)key);
 
     index = hash_code % MAX_BUCKETS;
-    printf("%lu", index);
     return index;
+
 }
 
 
@@ -56,7 +54,7 @@ void delete(void* key){
 
 }
 
-void* get(void* key){
+char* get(void* key){
 
     unsigned long index;
     index = get_index(key);
@@ -87,10 +85,11 @@ void set(void* key, void* value){
     int num_nodes;
 
     index = get_index(key);
-    printf("%lu", index);
-    Map* _dn = __m[index];
 
+    Map* _dn = __m[index];
     num_nodes = 0;
+
+
     while ( _dn->next != NULL ){
         _dn = _dn->next;
         num_nodes++;
@@ -105,11 +104,24 @@ void set(void* key, void* value){
     strcpy(node->value, value);
 
     node->next = NULL;
-    _dn->next = node;
 
+    if(num_nodes == 0){
+        __m[index] = node;
+    }else{
+        _dn->next = node;
+    }
     if (num_nodes / MAX_BUCKETS == 1){
         /* Needs rehash*/
         rehash();
     }
 
     }
+
+void map_init(){
+    for(int i = 0; i < MAX_BUCKETS; i++){
+        __m[i] = malloc(sizeof(Map));
+        __m[i]->key = NULL;
+        __m[i]->value = NULL;
+        __m[i]->next = NULL;
+     }
+}

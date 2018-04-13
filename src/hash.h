@@ -15,8 +15,9 @@ typedef struct Map{
 unsigned long hash(char*);
 
 void delete(void* key);
-void* get(void* key);
+char* get(void* key);
 void set(void* key, void* value);
 void rehash();
+void map_init();
 
 Map* __m[MAX_BUCKETS];
