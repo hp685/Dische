@@ -1,15 +1,17 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
+#include <malloc.h>
 #include "hash.h"
-
+#include "utils.h"
+//#include "memory.h"
 
 #define MULTIPLIER 97
 
 
 void rehash(){
-    /*TODO Implement rehashing of the map*/
+    /*TODO  */
+
 }
 
 
@@ -26,6 +28,7 @@ unsigned long hash(char* s){
 
     return h;
 }
+
 
 unsigned long get_index(void* key){
 
@@ -110,7 +113,6 @@ void set(void* key, void* value){
     int num_nodes;
 
     index = get_index(key);
-
     Map* _dn = __m[index];
     num_nodes = 0;
 
@@ -148,33 +150,57 @@ void set(void* key, void* value){
     }
 
 
-void map_init(){
 
-    for(int i = 0; i < MAX_BUCKETS; i++){
-        __m[i] = malloc(sizeof(Map));
-        __m[i]->key = NULL;
-        __m[i]->value = NULL;
-        __m[i]->next = NULL;
-     }
-}
+
 
 void reinit_node(Map* node){
+    node->key = NULL;
+    node->value = NULL;
+    node->next = NULL;
+    node->is_map = false;
+}
 
-  node->key = NULL;
-  node->value = NULL;
-  node->next = NULL;
+
+void map_init(){
+
+    __m = malloc(MAX_BUCKETS * sizeof(Map*));
+    Map *m = &__m;
+    m->size = MAX_BUCKETS;
+    for (int i = 0; i < MAX_BUCKETS; ++i){
+        __m[i] = malloc(sizeof(Map));
+    }
+}
+
+
+Map** get_map(){
+    return __m;
+}
+
+void destroy_map(){
+    Map* m_ptr = &__m;
+    Map* free_ptr;
+    for(int i = 0; i < m_ptr->size; i++){
+            if ( !__m[i]->is_map ){
+                /* unlink and return to free pool*/
+                free_ptr = __m[i]->next;
+                __m[i]->next = NULL;
+            }
+    }
+
+    ffree(free_ptr);  /* Do this asynchronously?*/
 
 }
+
 
 void print_chain(Map* head, unsigned long index){
 
-  printf("Bucket: %d", index);
+    printf("Bucket: %d", index);
 
-  while(head){
+    while(head){
 
-    printf("(%s, %s)->",head->key, head->value);
-    head = head->next;
-  }
+        printf("(%s, %s)->",head->key, head->value);
+        head = head->next;
+    }
 
-  putchar('\n');
+    putchar('\n');
 }
