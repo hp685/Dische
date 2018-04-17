@@ -1,38 +1,38 @@
-#include <stdlib.h>
+#include <stdio.h>
+
+#define MAX_BUCKETS 65536
+
+typedef struct Cache Cache;
+typedef struct Data Data;
+typedef struct Bucket Bucket;
 
 
-typedef struct ListNode{
+struct Cache{
+    size_t size;
+    Bucket* buckets;
+    int type;
 
-	struct ListNode* next;
-	char* key;
-	char* value;
-
-}ListNode;
-
-
-typedef struct Cache{
-	
-	struct ListNode* head;
-	struct ListNode* lastNode;
-	int size;
-
-}Cache;
+};
 
 
-void printCache(Cache*);
+struct Data{
+    void* key;
+    void* value;
+    Data* next;
+    int type;
+};
 
-void insertNode(Cache* , ListNode* );
 
-ListNode* findNode(Cache* , char* );
+struct Bucket{
 
-void setKey(Cache* , char* , char* );
+    Data* head;
+    size_t size;
+    int type;
 
-char* getValue(Cache*, char* );
+};
 
-void deleteKey(Cache*, char* );
+Cache* __c;
 
-void printNode(ListNode*);
+void init_cache();
 
-ListNode* findPrev(Cache* c, char* key);
-
-int countNodes(Cache* c);
+void init_bucket(Bucket*);
