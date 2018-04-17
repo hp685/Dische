@@ -9,7 +9,7 @@ typedef struct Bucket Bucket;
 
 struct Cache{
     size_t size;
-    Bucket* buckets;
+    Bucket* buckets;  /* ptr to array of buckets*/
     int type;
 
 };
@@ -35,4 +35,4 @@ Cache* __c;
 
 void init_cache();
 
-void init_bucket(Bucket*);
+void set(void* key, void* value);
