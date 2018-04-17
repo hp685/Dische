@@ -150,9 +150,6 @@ void set(void* key, void* value){
     }
 
 
-
-
-
 void reinit_node(Map* node){
     node->key = NULL;
     node->value = NULL;
@@ -177,9 +174,9 @@ Map** get_map(){
 }
 
 void destroy_map(){
-    Map* m_ptr = &__m;
+    Map *m = &__m;
     Map* free_ptr;
-    for(int i = 0; i < m_ptr->size; i++){
+    for(int i = 0; i < m->size; i++){
             if ( !__m[i]->is_map ){
                 /* unlink and return to free pool*/
                 free_ptr = __m[i]->next;

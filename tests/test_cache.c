@@ -20,12 +20,12 @@ void test_set_simple(){
 
 void test_many_set(){
     init_cache();
-    char* s = malloc(sizeof(char) * 5);
-    for (int i = 0; i < 10000; i++){
+    char* s = malloc(sizeof(char) * 7);
+    for (int i = 0; i < 1000000; i++){
         sprintf(s, "%d", i);
         set(s, s);
     }
-    for (int i = 0; i < 10000; i++){
+    for (int i = 0; i < 1000000; i++){
         sprintf(s, "%d", i);
         TEST_ASSERT_EQUAL(get(s), s);
     }

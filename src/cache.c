@@ -33,13 +33,13 @@ unsigned long get_index(void* key){
 void set(void* key, void* value){
 
     unsigned int index = get_index(key);
-    Bucket bucket = __c->buckets[index];
-    if (bucket.head->key == NULL){
-        bucket.head->key = key;
-        bucket.head->value = value;
+    Data* head = __c->buckets[index].head;
+    if (head->key == NULL){
+        head->key = key;
+        head->value = value;
     }
     else{
-        Data* node = bucket.head;
+        Data* node = head;
         while(node->next != NULL){
             node = node->next;
         }
@@ -53,13 +53,16 @@ void set(void* key, void* value){
 
 
 void* get(void* key){
+
     unsigned int index = get_index(key);
-    Bucket bucket = __c->buckets[index];
-    if (strcmp(bucket.head->key, key) == 0){
-        return bucket.head->value;
+    Data* head = __c->buckets[index].head;
+
+    if (strcmp(head->key, key) == 0){
+        return head->value;
     }
     else{
-        Data* node = bucket.head;
+
+        Data* node = head;
         while(node->next){
             node = node->next;
             if (strcmp(node->key, key) == 0){
@@ -69,6 +72,8 @@ void* get(void* key){
     }
     return NULL;
 }
+
+
 
 
 void init_cache(){
@@ -86,3 +91,11 @@ void init_cache(){
     }
 
 }
+
+//
+// void print_buckets(){
+//     for ( int i = 0; i < __c->size; ++i ){
+//         puts("Bucket:");
+//         printf("%d", __c->buckets[i])
+//     }
+// }
