@@ -9,7 +9,7 @@ typedef struct Bucket Bucket;
 
 struct Cache{
     size_t size;
-    Bucket* buckets;  /* ptr to array of buckets*/
+    Bucket** buckets; 
     int type;
 
 };
