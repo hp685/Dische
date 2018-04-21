@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <malloc.h>
 #include <string.h>
 #include "cache.h"
@@ -30,60 +31,56 @@ unsigned long get_index(void* key){
 }
 
 
-void set(void* key, void* value){
+Data* get_head_from_key(void* key){
 
     unsigned int index = get_index(key);
-    Data* head = __c->buckets[index]->head;
+    return __c->buckets[index]->head;
+}
+
+
+void set(void* key, void* value){
+
+        unsigned int index = get_index(key);
+
 
     if (__c->buckets[index]->head == NULL){
         __c->buckets[index]->head = malloc(sizeof(Data));
         set_node(__c->buckets[index]->head, key, value);
-        return;
-    }
+        __c->buckets[index]->head->next = NULL;
+        __c->buckets[index]->size++;
 
+    }
     else{
-        Data* node = head;
-        while(node->next != NULL){
-            if (strcmp(node->key, key) == 0){
-              node->value = value;
-              return;
+        Data* head = __c->buckets[index]->head;
+        while(head->next != NULL){
+            /* Search as we traverse */
+
+            if (strcmp(head->key, key) == 0){
+                /* Overwrite */
+                set_node(head, key, value);
+                return;
             }
-
-            node = node->next;
-            if (node != NULL){
-              puts(node->key);
-          }
+            head = head->next;
         }
-        node = node->next;
-        node = (Data*) malloc(sizeof(Data));
-        set_node(node, key, value);
-        node->next = NULL;
-
+        head->next = malloc(sizeof(Data));
+        set_node(head->next, key, value);
+        head->next->next = NULL;
+        __c->buckets[index]->size++;
     }
+
 }
 
 
 void* get(void* key){
 
-    unsigned int index = get_index(key);
-    Data* head = __c->buckets[index]->head;
-    /*TODO why is head not null here?*/
-    if (head && head->key == NULL){
-      return NULL;
-    }
+    Data* head = get_head_from_key(key);
 
-    else if (strcmp(head->key, key) == 0){
-        return head->value;
-    }
-    else{
-
-        Data* node = head;
-        while(node->next){
-            node = node->next;
-            if (strcmp(node->key, key) == 0){
-                return node->value;
-            }
+    while(head != NULL){
+        if (strcmp(head->key, key) == 0){
+            return head->value;
         }
+
+        head = head->next;
     }
     return NULL;
 }
@@ -92,52 +89,51 @@ void* get(void* key){
 
 void delete(void* key){
 
-  unsigned int index = get_index(key);
-  Data* head = __c->buckets[index]->head;
-  Data* to_free;
-  to_free = NULL;
+    unsigned int index = get_index(key);
 
-  if (strcmp(head->key, key) == 0){
-      to_free = head;
-      head = NULL;
-      free(to_free->key);
-      free(to_free->value);
-      free(to_free);
-      return;
-  }
-  while(head->next != NULL){
+    Data* to_free = NULL;
 
-      if (strcmp(head->next->key, key) == 0 ){
+    if(__c->buckets[index]->head && strcmp(__c->buckets[index]->head->key, key) == 0){
+        to_free = __c->buckets[index]->head;
+        __c->buckets[index]->head = __c->buckets[index]->head->next;
+        __c->buckets[index]->size--;
 
-          if (head->next->next != NULL){
-              to_free = head->next;
-              head->next = head->next->next;
-
-          }
-          else{
-            to_free = head->next;
-            head->next = NULL;
-
-          }
-        }
-
-      head = head->next;
     }
+    else{
+        while(__c->buckets[index]->head != NULL){
 
-    if (to_free != NULL) {
-      free(to_free);
+            if (__c->buckets[index]->head->next && strcmp(__c->buckets[index]->head->next->key, key) == 0){
+                to_free = __c->buckets[index]->head->next;
+                __c->buckets[index]->head->next = __c->buckets[index]->head->next->next;
+                __c->buckets[index]->size--;
+            }
+            __c->buckets[index]->head = __c->buckets[index]->head->next;
+        }
+    }
+    if (to_free){
+        cleanup(to_free);
     }
 }
+
+
 
 void set_node(Data* head, void* key, void* value){
 
-    head->key = malloc(sizeof(void*));
-    head->value = malloc(sizeof(void*));
+    assert( head != NULL);
+    head->key = (char*) malloc( (strlen(key) + 1) * sizeof(char));
+    head->value = (char*) malloc( (strlen(value) + 1) * sizeof(char));
     strcpy(head->key, key);
     strcpy(head->value, value);
+
 }
 
 
+void cleanup(Data* node){
+
+    free(node->key);
+    free(node->value);
+    free(node);
+}
 
 void init_cache(){
 
@@ -149,15 +145,20 @@ void init_cache(){
     for (i = 0; i < __c->size; ++i){
         __c->buckets[i] = malloc(sizeof(Bucket));
         __c->buckets[i]->head = NULL;
-
+        __c->buckets[i]->size = 0;
     }
 
 }
 
-//
-// void print_buckets(){
-//     for ( int i = 0; i < __c->size; ++i ){
-//         puts("Bucket:");
-//         printf("%d", __c->buckets[i])
-//     }
-// }
+
+void print_buckets(){
+    for ( int i = 0; i < __c->size; ++i){
+        puts("Bucket:");
+        Data* head = __c->buckets[i]->head;
+        while(head != NULL){
+            printf("(%s, %s)->", head->key, head->value);
+            head = head->next;
+        }
+        puts("\n");
+        }
+}

@@ -12,23 +12,35 @@ void test_init_cache(){
 
 }
 
+
 void test_set_simple(){
     init_cache();
     set("FOO", "BAR");
-    TEST_ASSERT_EQUAL_STRING(get("FOO"), "BAR");
+    TEST_ASSERT_EQUAL_STRING("BAR", get("FOO"));
 }
 
+
 void test_many_set(){
+
     init_cache();
     char* s = malloc(sizeof(char) * 7);
-    for (int i = 0; i < 10; i++){
+    int NUM_KEYS = 10000;
+    for (int i = 0; i < NUM_KEYS; i++){
         sprintf(s, "%d", i);
         set(s, s);
     }
-    for (int i = 0; i < 10; i++){
+
+    for (int i = 0; i < NUM_KEYS; i++){
         sprintf(s, "%d", i);
-        TEST_ASSERT_EQUAL_STRING(get(s), s);
+        TEST_ASSERT_EQUAL_STRING(s, get(s));
     }
+
+    for(int i = 0; i < NUM_KEYS; ++i){
+        sprintf(s, "%d", i);
+        delete(s);
+        TEST_ASSERT_EQUAL(NULL, get(s));
+    }
+
 }
 
 
@@ -38,6 +50,7 @@ void test_delete_key_simple(){
   set("FOO", "BAR");
   TEST_ASSERT_EQUAL_STRING(get("FOO"), "BAR");
   delete("FOO");
+  puts("---------------");
   TEST_ASSERT_EQUAL(get("FOO"), NULL);
 
 }

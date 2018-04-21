@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#define MAX_BUCKETS 65536
+#define MAX_BUCKETS 5
 
 typedef struct Cache Cache;
 typedef struct Data Data;
@@ -9,7 +9,7 @@ typedef struct Bucket Bucket;
 
 struct Cache{
     size_t size;
-    Bucket** buckets; 
+    Bucket** buckets;
     int type;
 
 };
