@@ -20,6 +20,7 @@ unsigned long hash(char* s){
 }
 
 
+
 unsigned long get_index(void* key){
 
     unsigned long index;
@@ -71,7 +72,7 @@ void set(void* key, void* value){
 }
 
 
-void* get(void* key){
+void* get_value(void* key){
 
     Data* head = get_head_from_key(key);
 
@@ -84,7 +85,6 @@ void* get(void* key){
     }
     return NULL;
 }
-
 
 
 void delete(void* key){
@@ -135,6 +135,7 @@ void cleanup(Data* node){
     free(node);
 }
 
+
 void init_cache(){
 
     unsigned int i;
@@ -152,7 +153,7 @@ void init_cache(){
 
 
 void print_buckets(){
-    for ( int i = 0; i < __c->size; ++i){
+    for (int i = 0; i < __c->size; ++i){
         puts("Bucket:");
         Data* head = __c->buckets[i]->head;
         while(head != NULL){

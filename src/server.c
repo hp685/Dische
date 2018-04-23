@@ -6,22 +6,17 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
-#include "cache.h"
-#include "queue.h"
 #include "threadpool.h"
+#include "cache.h"
 
 #define MAX_BYTES 65536
 
 #define GET "GET"
 #define SET "SET"
 #define DELETE "DELETE"
-
+#define ACK "OK"
 
 const int LISTEN_BACKLOG = 512;
-const Cache* cache = (Cache*) malloc(sizeof(Cache));
-
-
-
 
 char* dispatch(char* item){
 
@@ -35,8 +30,8 @@ char* dispatch(char* item){
         token = strtok(NULL, delim);
         char* key = (char* ) malloc(sizeof(token));
         strcpy(key, token);
-        
-        return getKey(cache, key);
+
+        return get_value(key);
 
     }else if(strcmp(action, SET) == 0){
 
@@ -46,56 +41,37 @@ char* dispatch(char* item){
         token = strtok(NULL, delim);
         char* value = (char* ) malloc(sizeof(token));
         strcpy(value, token);
-    
-        return setKey(cache, key, value);
+
+        set(key, value);
+        return ACK;
 
     }else if(strcmp(action, DELETE) == 0){
 
         token = strtok(NULL, delim);
         char* key = (char*) malloc(sizeof(token));
         strcpy(key, token);
-    
-        return deleteKey(cache, key);
+
+        delete(key);
+        return ACK;
 
     }else{
-    
+
         perror("Bad command!");
         exit(EXIT_FAILURE);
-  
+
     }
 }
 
 
-void handle_message(int fd){
-    
-    char* buffer;
-    ssize_t bytes_read = read(fd, buffer, MAX_BYTES);
+void do_work(Task* request){
 
-    if (bytes_read <= 0){
-    
-        perror("Error reading from socket");
-        exit(EXIT_FAILURE);
-    
+    char* result = dispatch(request->item);
+    puts(request->item);
+    puts("\n");
+    if (write(request->fd, result, strlen(result) + 1) == -1){
+        perror("Error writing to fd");
     }
-
-    printf("Bytes read: {%lu} with data {%s}", bytes_read, buffer);
-
-    write(fd, buffer, bytes_read);
-    close(fd);
-}
-
-
-void handle_in_thread(int fd){
-    
-    pthread_t  thread;
-    void *res;
-    int rc = pthread_create(thread, NULL, handle_message, (void*) fd);
-    if (rc != 0){
-        perror("Error creating thread");
-        exit(EXIT_FAILURE);
-    }
-    
-    pthread_join(thread, &res);
+    //close(request->fd);
 }
 
 
@@ -103,8 +79,9 @@ void serve_forever(){
 
     struct sockaddr_in address;
     struct sockaddr_in client_address;
+    char buffer[MAX_BYTES];
     ThreadPool* pool = create_new_pool();
-    pthread_mutex_t* pool_lock = pool->work_q->lock;
+
     int sock = socket(AF_INET, SOCK_STREAM, 0);
 
     address.sin_family = AF_INET;
@@ -117,14 +94,18 @@ void serve_forever(){
             }
             while(1){
                 int client_fd = accept(sock, (struct sockaddr *) &client_address, sizeof(client_address));
-		            Task* request = create_new_task(client_fd);
-                request->item = read(client_fd, buffer, MAX_BYTES);
+		            Task* request = new_task(client_fd);
+                read(client_fd, buffer, MAX_BYTES);
+                request->item = malloc(sizeof(char) * strlen(buffer));
+                /* TODO split buffer by item delimiter*/
+                strcpy(request->item, buffer);
                 request->function = do_work;
+
                 /*TODO: Make this an inqueue with its own lock to prevent server from blocking to obtain work_q lock*/
-                pthread_mutex_lock(&pool_lock);
+                pthread_mutex_lock(&pool->work_q->lock);
 
                 put(pool->work_q, request);
-                pthread_mutex_unlock(&pool_lock);
+                pthread_mutex_unlock(&pool->work_q->lock);
             }
         }
         else{
@@ -138,8 +119,8 @@ void serve_forever(){
     }
 
 int main(){
-    
+
     serve_forever();
-    
+
     return 0;
 }

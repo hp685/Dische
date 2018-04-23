@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#define MAX_BUCKETS 5
+#define MAX_BUCKETS 1<<21
 
 typedef struct Cache Cache;
 typedef struct Data Data;

@@ -1,5 +1,6 @@
 #include <pthread.h>
 #include <stdbool.h>
+#include <semaphore.h>
 #include "queue.h"
 
 #define NUM_THREADS 1
