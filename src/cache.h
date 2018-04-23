@@ -35,4 +35,5 @@ Cache* __c;
 
 void init_cache();
 
-void set(void* key, void* value);
+void set(char* key, char* value);
+char* get_value(char* key);

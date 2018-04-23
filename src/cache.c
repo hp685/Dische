@@ -39,12 +39,13 @@ Data* get_head_from_key(void* key){
 }
 
 
-void set(void* key, void* value){
+void set(char* key, char* value){
 
         unsigned int index = get_index(key);
 
 
     if (__c->buckets[index]->head == NULL){
+
         __c->buckets[index]->head = malloc(sizeof(Data));
         set_node(__c->buckets[index]->head, key, value);
         __c->buckets[index]->head->next = NULL;
@@ -52,7 +53,15 @@ void set(void* key, void* value){
 
     }
     else{
+
         Data* head = __c->buckets[index]->head;
+
+        /* Special check for match at head */
+        if (strcmp(head->key, key) == 0){
+            set_node(head, key, value);
+            return;
+        }
+
         while(head->next != NULL){
             /* Search as we traverse */
 
@@ -63,6 +72,7 @@ void set(void* key, void* value){
             }
             head = head->next;
         }
+
         head->next = malloc(sizeof(Data));
         set_node(head->next, key, value);
         head->next->next = NULL;
@@ -72,11 +82,12 @@ void set(void* key, void* value){
 }
 
 
-void* get_value(void* key){
+char* get_value(char* key){
 
     Data* head = get_head_from_key(key);
 
     while(head != NULL){
+
         if (strcmp(head->key, key) == 0){
             return head->value;
         }
@@ -153,13 +164,16 @@ void init_cache(){
 
 
 void print_buckets(){
+
     for (int i = 0; i < __c->size; ++i){
-        puts("Bucket:");
         Data* head = __c->buckets[i]->head;
+        if (head){
+            puts("\n");
+            puts("Bucket:");
+        }
         while(head != NULL){
             printf("(%s, %s)->", head->key, head->value);
             head = head->next;
         }
-        puts("\n");
         }
 }

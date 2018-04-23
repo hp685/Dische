@@ -1,126 +1,260 @@
-#include<arpa/inet.h>
-#include <sys/socket.h>
-#include <errno.h>
-#include <pthread.h>
-#include <stdlib.h>
-#include <unistd.h>
+/*
+ * tcpserver.c - A simple TCP echo server
+ * usage: tcpserver <port>
+ */
+
 #include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
 #include <string.h>
+#include <netdb.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include "threadpool.h"
 #include "cache.h"
+#define BUFSIZE 1024
 
-#define MAX_BYTES 65536
+#if 0
+/*
+ * Structs exported from in.h
+ */
 
-#define GET "GET"
-#define SET "SET"
-#define DELETE "DELETE"
-#define ACK "OK"
+/* Internet address */
+struct in_addr {
+  unsigned int s_addr;
+};
 
-const int LISTEN_BACKLOG = 512;
+/* Internet style socket address */
+struct sockaddr_in  {
+  unsigned short int sin_family; /* Address family */
+  unsigned short int sin_port;   /* Port number */
+  struct in_addr sin_addr;	 /* IP address */
+  unsigned char sin_zero[...];   /* Pad to size of 'struct sockaddr' */
+};
 
-char* dispatch(char* item){
+/*
+ * Struct exported from netdb.h
+ */
 
-    const char* delim = " ";
-    char* token = strtok(item, delim);
-    char* action = (char* ) malloc(sizeof(token));
-    strcpy(action, token);
+/* Domain name service (DNS) host entry */
+struct hostent {
+  char    *h_name;        /* official name of host */
+  char    **h_aliases;    /* alias list */
+  int     h_addrtype;     /* host address type */
+  int     h_length;       /* length of address */
+  char    **h_addr_list;  /* list of addresses */
+}
+#endif
 
-    if (strcmp(action, GET) == 0){
+/*
+ * error - wrapper for perror
+ */
 
-        token = strtok(NULL, delim);
-        char* key = (char* ) malloc(sizeof(token));
-        strcpy(key, token);
 
-        return get_value(key);
+ #define MAX_BYTES 1024
 
-    }else if(strcmp(action, SET) == 0){
+ #define GET "GET"
+ #define SET "SET"
+ #define DELETE "DELETE"
+ #define ACK "OK"
 
-        token = strtok(NULL, delim);
-        char* key =  (char* ) malloc(sizeof(token));
-        strcpy(key, token);
-        token = strtok(NULL, delim);
-        char* value = (char* ) malloc(sizeof(token));
-        strcpy(value, token);
+ const int LISTEN_BACKLOG = 512;
 
-        set(key, value);
-        return ACK;
 
-    }else if(strcmp(action, DELETE) == 0){
+ char* dispatch(char* item){
 
-        token = strtok(NULL, delim);
-        char* key = (char*) malloc(sizeof(token));
-        strcpy(key, token);
+     if (item == NULL)
+         return item;
+     const char* delim = " ";
+     char* token = strtok(item, delim);
 
-        delete(key);
-        return ACK;
+     char* action = (char* ) malloc(sizeof(char)* strlen(token));
+     strcpy(action, token);
 
-    }else{
+     if(!action)
+         return NULL;
 
-        perror("Bad command!");
-        exit(EXIT_FAILURE);
+     if (strcmp(action, GET) == 0){
 
-    }
+         token = strtok(NULL, delim);
+         char* key = (char* ) malloc(sizeof(char) * strlen(token));
+
+         strncpy(key, token, strlen(token)-1);
+         char* result = (char*) get_value(key);
+
+         if (result == NULL){
+             return NULL;
+         }
+         char* copy = malloc(sizeof(char)* strlen(result+1));
+         strcpy(copy, result);
+         return copy;
+
+     }else if(strcmp(action, SET) == 0){
+
+         token = strtok(NULL, delim);
+         char* key =  (char* ) malloc(sizeof(char)* strlen(token));
+         strcpy(key, token);
+         token = strtok(NULL, delim);
+         char* value = (char* ) malloc(sizeof(char)* strlen(token));
+         strncpy(value, token, strlen(token)-1);
+
+         set(key, value);
+         return ACK;
+
+     }else if(strcmp(action, DELETE) == 0){
+
+         token = strtok(NULL, delim);
+         char* key = (char*) malloc(sizeof(char)* strlen(token));
+         strcpy(key, token);
+         delete(key);
+         return ACK;
+
+     }else{
+
+         puts("Invalid command!");
+         return NULL;
+
+     }
+ }
+
+
+ void do_work(Task* request){
+     char* result = dispatch(request->item);
+
+     puts(result);
+     if (write(request->fd, result, strlen(result) + 1) == -1){
+         perror("Error writing to fd");
+     }
+
+ }
+
+void error(char *msg) {
+  perror(msg);
+  exit(1);
 }
 
 
-void do_work(Task* request){
+void process_task(char* buf, int childfd, ThreadPool* pool, int bytes_read){
 
-    char* result = dispatch(request->item);
-    puts(request->item);
-    puts("\n");
-    if (write(request->fd, result, strlen(result) + 1) == -1){
-        perror("Error writing to fd");
-    }
-    //close(request->fd);
+
+    Task* request = new_task(childfd);
+    if (bytes_read <= 0 )
+        return;
+    request->item = buf; //malloc(sizeof(char)* bytes_read);
+    //bzero(request->item, sizeof(request->item));
+    //strncpy(request->item, buf, bytes_read);
+    request->function = do_work;
+    request->argument = request;
+    put(pool->work_q, request);
 }
 
+int main(int argc, char **argv) {
+  int parentfd; /* parent socket */
+  int childfd; /* child socket */
+  int portno; /* port to listen on */
+  int clientlen; /* byte size of client's address */
+  struct sockaddr_in serveraddr; /* server's addr */
+  struct sockaddr_in clientaddr; /* client addr */
+  struct hostent *hostp; /* client host info */
+  char buf[BUFSIZE]; /* message buffer */
+  char *hostaddrp; /* dotted decimal host addr string */
+  int optval; /* flag value for setsockopt */
+  int n; /* message byte size */
+  ThreadPool* pool = create_new_pool(); /*Create thread pool to process tasks*/
+  init_cache();
+  /*
+   * check command line arguments
+   */
+  if (argc != 2) {
+    fprintf(stderr, "usage: %s <port>\n", argv[0]);
+    exit(1);
+  }
+  portno = atoi(argv[1]);
 
-void serve_forever(){
+  /*
+   * socket: create the parent socket
+   */
+  parentfd = socket(AF_INET, SOCK_STREAM, 0);
+  if (parentfd < 0)
+    error("ERROR opening socket");
 
-    struct sockaddr_in address;
-    struct sockaddr_in client_address;
-    char buffer[MAX_BYTES];
-    ThreadPool* pool = create_new_pool();
+  /* setsockopt: Handy debugging trick that lets
+   * us rerun the server immediately after we kill it;
+   * otherwise we have to wait about 20 secs.
+   * Eliminates "ERROR on binding: Address already in use" error.
+   */
+  optval = 1;
+  setsockopt(parentfd, SOL_SOCKET, SO_REUSEADDR,
+	     (const void *)&optval , sizeof(int));
 
-    int sock = socket(AF_INET, SOCK_STREAM, 0);
+  /*
+   * build the server's Internet address
+   */
+  bzero((char *) &serveraddr, sizeof(serveraddr));
 
-    address.sin_family = AF_INET;
-    address.sin_port = htons(7777);
+  /* this is an Internet address */
+  serveraddr.sin_family = AF_INET;
 
-    if (sock >= 0) {
-        if (bind(sock, (struct sockaddr *) &address, sizeof(address)) == 0){
-            if(listen(sock, LISTEN_BACKLOG) < 0){
-                perror("Error on listen");
-            }
-            while(1){
-                int client_fd = accept(sock, (struct sockaddr *) &client_address, sizeof(client_address));
-		            Task* request = new_task(client_fd);
-                read(client_fd, buffer, MAX_BYTES);
-                request->item = malloc(sizeof(char) * strlen(buffer));
-                /* TODO split buffer by item delimiter*/
-                strcpy(request->item, buffer);
-                request->function = do_work;
+  /* let the system figure out our IP address */
+  serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-                /*TODO: Make this an inqueue with its own lock to prevent server from blocking to obtain work_q lock*/
-                pthread_mutex_lock(&pool->work_q->lock);
+  /* this is the port we will listen on */
+  serveraddr.sin_port = htons((unsigned short)portno);
 
-                put(pool->work_q, request);
-                pthread_mutex_unlock(&pool->work_q->lock);
-            }
-        }
-        else{
-            perror("Cannot bind socket");
-        }
+  /*
+   * bind: associate the parent socket with a port
+   */
+  if (bind(parentfd, (struct sockaddr *) &serveraddr,
+	   sizeof(serveraddr)) < 0)
+    error("ERROR on binding");
 
-    }
-    else{
-        perror("Error creating socket");
-    }
-    }
+  /*
+   * listen: make this socket ready to accept connection requests
+   */
+  if (listen(parentfd, 5) < 0) /* allow 5 requests to queue up */
+    error("ERROR on listen");
 
-int main(){
+  /*
+   * main loop: wait for a connection request, echo input line,
+   * then close connection.
+   */
+  clientlen = sizeof(clientaddr);
+  while (1) {
 
-    serve_forever();
+    /*
+     * accept: wait for a connection request
+     */
+    childfd = accept(parentfd, (struct sockaddr *) &clientaddr, &clientlen);
+    if (childfd < 0)
+      error("ERROR on accept");
 
-    return 0;
+    /*
+     * gethostbyaddr: determine who sent the message
+     */
+    hostp = gethostbyaddr((const char *)&clientaddr.sin_addr.s_addr,
+			  sizeof(clientaddr.sin_addr.s_addr), AF_INET);
+    if (hostp == NULL)
+      error("ERROR on gethostbyaddr");
+    hostaddrp = inet_ntoa(clientaddr.sin_addr);
+    if (hostaddrp == NULL)
+      error("ERROR on inet_ntoa\n");
+    printf("server established connection with %s (%s)\n",
+	   hostp->h_name, hostaddrp);
+
+    /*
+     * read: read input string from the client
+     */
+    bzero(buf, BUFSIZE);
+    n = read(childfd, buf, BUFSIZE);
+    if (n < 0)
+      error("ERROR reading from socket");
+    printf("server received %d bytes: %s", n, buf);
+
+
+    process_task(buf, childfd, pool, n);
+
+
+  }
 }
