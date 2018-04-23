@@ -15,7 +15,6 @@ unsigned long hash(char* s){
     for(int i = 0; i < strlen(us); i++){
         h = h * MULTIPLIER + us[i];
     }
-
     return h;
 }
 
@@ -25,7 +24,6 @@ unsigned long get_index(void* key){
 
     unsigned long index;
     unsigned long hash_code = hash((char*)key);
-
     index = hash_code % MAX_BUCKETS;
     return index;
 
@@ -34,15 +32,14 @@ unsigned long get_index(void* key){
 
 Data* get_head_from_key(void* key){
 
-    unsigned int index = get_index(key);
+    unsigned long index = get_index(key);
     return __c->buckets[index]->head;
 }
 
 
 void set(char* key, char* value){
 
-        unsigned int index = get_index(key);
-
+    unsigned long index = get_index(key);
 
     if (__c->buckets[index]->head == NULL){
 
@@ -100,7 +97,7 @@ char* get_value(char* key){
 
 void delete(void* key){
 
-    unsigned int index = get_index(key);
+    unsigned long index = get_index(key);
 
     Data* to_free = NULL;
 
@@ -111,14 +108,16 @@ void delete(void* key){
 
     }
     else{
-        while(__c->buckets[index]->head != NULL){
+        Data* head = __c->buckets[index]->head;
+        while(head->next != NULL){
 
-            if (__c->buckets[index]->head->next && strcmp(__c->buckets[index]->head->next->key, key) == 0){
-                to_free = __c->buckets[index]->head->next;
-                __c->buckets[index]->head->next = __c->buckets[index]->head->next->next;
+            if (head->next && strcmp(head->next->key, key) == 0){
+                to_free = head->next;
+                head->next = head->next->next;
                 __c->buckets[index]->size--;
+                break;
             }
-            __c->buckets[index]->head = __c->buckets[index]->head->next;
+            head = head->next;
         }
     }
     if (to_free){
@@ -167,11 +166,12 @@ void print_buckets(){
 
     for (int i = 0; i < __c->size; ++i){
         Data* head = __c->buckets[i]->head;
-        if (head){
+        if (head != NULL){
             puts("\n");
             puts("Bucket:");
         }
         while(head != NULL){
+
             printf("(%s, %s)->", head->key, head->value);
             head = head->next;
         }

@@ -3,7 +3,7 @@
 #include <semaphore.h>
 #include "queue.h"
 
-#define NUM_THREADS 1
+#define NUM_THREADS 10
 #define POLL_INTERVAL 1
 
 typedef struct {

@@ -1,6 +1,5 @@
 /*
- * tcpserver.c - A simple TCP echo server
- * usage: tcpserver <port>
+ *
  */
 
 #include <stdio.h>
@@ -59,6 +58,7 @@ struct hostent {
  #define SET "SET"
  #define DELETE "DELETE"
  #define ACK "OK"
+ #define SHOW "SHOW\n"
 
  const int LISTEN_BACKLOG = 512;
 
@@ -87,6 +87,7 @@ struct hostent {
          if (result == NULL){
              return NULL;
          }
+
          char* copy = malloc(sizeof(char)* strlen(result+1));
          strcpy(copy, result);
          return copy;
@@ -107,11 +108,16 @@ struct hostent {
 
          token = strtok(NULL, delim);
          char* key = (char*) malloc(sizeof(char)* strlen(token));
-         strcpy(key, token);
+         strncpy(key, token, strlen(token)-1);
          delete(key);
          return ACK;
 
-     }else{
+
+     }else if(strcmp(action, SHOW) == 0){
+       print_buckets();
+       return ACK;
+     }
+     else{
 
          puts("Invalid command!");
          return NULL;
@@ -121,13 +127,16 @@ struct hostent {
 
 
  void do_work(Task* request){
-     char* result = dispatch(request->item);
 
+     char* result = dispatch(request->item);
+     if (result == NULL){
+       result = "NULL";
+     }
      puts(result);
      if (write(request->fd, result, strlen(result) + 1) == -1){
          perror("Error writing to fd");
      }
-
+     close(request->fd);
  }
 
 void error(char *msg) {
@@ -249,10 +258,8 @@ int main(int argc, char **argv) {
     bzero(buf, BUFSIZE);
     n = read(childfd, buf, BUFSIZE);
     if (n < 0)
-      error("ERROR reading from socket");
+        error("ERROR reading from socket");
     printf("server received %d bytes: %s", n, buf);
-
-
     process_task(buf, childfd, pool, n);
 
 
