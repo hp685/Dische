@@ -30,6 +30,8 @@ test_hash: $(TESTDIR)test_hash.c
 server:
 	$(CC) $(CFLAGS) $(SRCDIR)cache.h $(SRCDIR)queue.h $(SRCDIR)threadpool.h  $(SRCDIR)cache.c $(SRCDIR)queue.c $(SRCDIR)threadpool.c $(SRCDIR)server.c -o server
 
+client:
+	$(CC)  $(SRCDIR)test_client.c -o client
 
 clean:
 	rm $(TESTDIR)*.o
