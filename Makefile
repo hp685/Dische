@@ -3,7 +3,7 @@
 CC=gcc
 
 CFLAGS= -I ./src/ -I ./unity/src/ -std=c99 -pthread
-TFLAGS= ./unity/src/unity.c -pthread
+TFLAGS= ./unity/src/unity.c 
 SRCDIR = ./src/
 TESTDIR = ./tests/
 
